@@ -13,8 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from fate_flow.utils.authentication_utils import authentication_check
-from federatedml.protobuf.generated import pipeline_pb2
 from arch.api.utils import dtable_utils
 from arch.api.utils.core import current_timestamp, json_dumps, json_loads
 from arch.api.utils.log_utils import schedule_logger
@@ -27,7 +25,9 @@ from fate_flow.manager.tracking import Tracking
 from fate_flow.settings import BOARD_DASHBOARD_URL, USE_AUTHENTICATION
 from fate_flow.utils import detect_utils
 from fate_flow.utils import job_utils
+from fate_flow.utils.authentication_utils import authentication_check
 from fate_flow.utils.job_utils import generate_job_id, save_job_conf, get_job_dsl_parser, get_job_log_directory
+from federatedml.protobuf.generated import pipeline_pb2
 
 
 class JobController(object):
@@ -92,7 +92,7 @@ class JobController(object):
         TaskScheduler.distribute_job(job=job, roles=job_runtime_conf['role'], job_initiator=job_initiator)
 
         # push into queue
-        job_event = job_utils.job_event(job_id, initiator_role,  initiator_party_id)
+        job_event = job_utils.job_event(job_id, initiator_role, initiator_party_id)
         try:
             RuntimeConfig.JOB_QUEUE.put_event(job_event)
         except Exception as e:
@@ -103,7 +103,7 @@ class JobController(object):
         board_url = BOARD_DASHBOARD_URL.format(job_id, job_initiator['role'], job_initiator['party_id'])
         logs_directory = get_job_log_directory(job_id)
         return job_id, path_dict['job_dsl_path'], path_dict['job_runtime_conf_path'], logs_directory, \
-               {'model_id': job_parameters['model_id'],'model_version': job_parameters['model_version']}, board_url
+               {'model_id': job_parameters['model_id'], 'model_version': job_parameters['model_version']}, board_url
 
     @staticmethod
     def kill_job(job_id, role, party_id, job_initiator, timeout=False, component_name=''):
@@ -218,7 +218,7 @@ class JobController(object):
         job_tracker.save_output_model({'Pipeline': pipeline}, 'pipeline')
 
     @staticmethod
-    def clean_job(job_id,role, party_id, roles, party_ids):
+    def clean_job(job_id, role, party_id, roles, party_ids):
         schedule_logger(job_id).info('job {} on {} {} start to clean'.format(job_id, role, party_id))
         tasks = job_utils.query_task(job_id=job_id, role=role, party_id=party_id)
         for task in tasks:
@@ -254,8 +254,3 @@ class JobController(object):
                 raise Exception(
                     'role {} party id {} cancel waiting job {} failed, not is initiator'.format(role, party_id, job_id))
             raise Exception('role {} party id {} cancel waiting job failed, no find jod {}'.format(role, party_id, job_id))
-
-
-
-
-

@@ -1,0 +1,12 @@
+# Copyright Greg Haskins All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+FROM python:3.6
+RUN apt-get update
+RUN apt-get install -y apt-utils libgmp3-dev libmpfr-dev libmpfr-doc libmpfr6 libmpc-dev
+
+WORKDIR /fate
+ADD requirements.txt /fate
+RUN pip install -r requirements.txt

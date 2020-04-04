@@ -23,12 +23,12 @@ from arch.api.utils.core import current_timestamp, base64_encode, json_loads, ge
 from arch.api.utils.log_utils import schedule_logger
 from fate_flow.db.db_models import Job
 from fate_flow.driver.task_executor import TaskExecutor
+from fate_flow.entity.constant_config import JobStatus, Backend, TaskStatus
 from fate_flow.entity.runtime_config import RuntimeConfig
 from fate_flow.settings import API_VERSION, HTTP_PORT
 from fate_flow.utils import job_utils
 from fate_flow.utils.api_utils import federated_api
 from fate_flow.utils.job_utils import query_task, get_job_dsl_parser, query_job
-from fate_flow.entity.constant_config import JobStatus, Backend, TaskStatus
 
 
 class TaskScheduler(object):
@@ -43,16 +43,16 @@ class TaskScheduler(object):
                 else:
                     job.f_is_initiator = 0
                 response_json = federated_api(job_id=job.f_job_id,
-                              method='POST',
-                              endpoint='/{}/schedule/{}/{}/{}/create'.format(
-                                  API_VERSION,
-                                  job.f_job_id,
-                                  role,
-                                  party_id),
-                              src_party_id=job_initiator['party_id'],
-                              dest_party_id=party_id, src_role=job_initiator['role'],
-                              json_body=job.to_json(),
-                              work_mode=job.f_work_mode)
+                                              method='POST',
+                                              endpoint='/{}/schedule/{}/{}/{}/create'.format(
+                                                  API_VERSION,
+                                                  job.f_job_id,
+                                                  role,
+                                                  party_id),
+                                              src_party_id=job_initiator['party_id'],
+                                              dest_party_id=party_id, src_role=job_initiator['role'],
+                                              json_body=job.to_json(),
+                                              work_mode=job.f_work_mode)
                 if response_json["retcode"]:
                     job.f_status = JobStatus.FAILED
                     TaskScheduler.sync_job_status(job_id=job.f_job_id, roles=roles,
@@ -128,7 +128,6 @@ class TaskScheduler(object):
         schedule_logger(job_id).info('job {} finished, status is {}'.format(job.f_job_id, job.f_status))
         t.cancel()
 
-
     @staticmethod
     def run_component(job_id, job_runtime_conf, job_parameters, job_initiator, job_args, dag, component):
         parameters = component.get_role_parameters()
@@ -146,26 +145,26 @@ class TaskScheduler(object):
                 dest_party_id = party_parameters.get('local', {}).get('party_id')
 
                 response = federated_api(job_id=job_id,
-                              method='POST',
-                              endpoint='/{}/schedule/{}/{}/{}/{}/{}/run'.format(
-                                  API_VERSION,
-                                  job_id,
-                                  component_name,
-                                  task_id,
-                                  role,
-                                  dest_party_id),
-                              src_party_id=job_initiator['party_id'],
-                              dest_party_id=dest_party_id,
-                              src_role=job_initiator['role'],
-                              json_body={'job_parameters': job_parameters,
-                                         'job_initiator': job_initiator,
-                                         'job_args': party_job_args,
-                                         'parameters': party_parameters,
-                                         'module_name': module_name,
-                                         'input': component.get_input(),
-                                         'output': component.get_output(),
-                                         'job_server': {'ip': get_lan_ip(), 'http_port': RuntimeConfig.HTTP_PORT}},
-                              work_mode=job_parameters['work_mode'])
+                                         method='POST',
+                                         endpoint='/{}/schedule/{}/{}/{}/{}/{}/run'.format(
+                                             API_VERSION,
+                                             job_id,
+                                             component_name,
+                                             task_id,
+                                             role,
+                                             dest_party_id),
+                                         src_party_id=job_initiator['party_id'],
+                                         dest_party_id=dest_party_id,
+                                         src_role=job_initiator['role'],
+                                         json_body={'job_parameters': job_parameters,
+                                                    'job_initiator': job_initiator,
+                                                    'job_args': party_job_args,
+                                                    'parameters': party_parameters,
+                                                    'module_name': module_name,
+                                                    'input': component.get_input(),
+                                                    'output': component.get_output(),
+                                                    'job_server': {'ip': get_lan_ip(), 'http_port': RuntimeConfig.HTTP_PORT}},
+                                         work_mode=job_parameters['work_mode'])
                 if response['retcode']:
                     if 'not authorized' in response['retmsg']:
                         raise Exception('run component {} not authorized'.format(component_name))
@@ -188,9 +187,9 @@ class TaskScheduler(object):
         if task_success:
             next_components = dag.get_next_components(component_name)
             schedule_logger(job_id).info('job {} component {} next components is {}'.format(job_id, component_name,
-                                                                                    [next_component.get_name() for
-                                                                                     next_component in
-                                                                                     next_components]))
+                                                                                            [next_component.get_name() for
+                                                                                             next_component in
+                                                                                             next_components]))
             for next_component in next_components:
                 try:
                     schedule_logger(job_id).info(
@@ -199,8 +198,9 @@ class TaskScheduler(object):
                                                                            component=next_component)
                     job_status = TaskScheduler.check_job_status(job_id)
                     schedule_logger(job_id).info(
-                        'job {} component {} dependencies status is {}, job status is {}'.format(job_id, next_component.get_name(),
-                                                                               dependencies_status, job_status))
+                        'job {} component {} dependencies status is {}, job status is {}'.format(job_id,
+                                                                                                 next_component.get_name(),
+                                                                                                 dependencies_status, job_status))
                     if dependencies_status and job_status:
                         run_status = TaskScheduler.run_component(job_id, job_runtime_conf, job_parameters,
                                                                  job_initiator, job_args, dag,
@@ -229,14 +229,14 @@ class TaskScheduler(object):
             return False
         dependent_component_names = dependencies.get(component.get_name(), [])
         schedule_logger(job_id).info('job {} component {} all dependent component: {}'.format(job_id, component.get_name(),
-                                                                                      dependent_component_names))
+                                                                                              dependent_component_names))
         for dependent_component in dependent_component_names:
             dependent_component_name = dependent_component["component_name"]
             dependent_component = dag.get_component_info(dependent_component_name)
             dependent_component_task_status = TaskScheduler.check_task_status(job_id, dependent_component)
             schedule_logger(job_id).info('job {} component {} dependency {} status is {}'.format(job_id, component.get_name(),
-                                                                                         dependent_component_name,
-                                                                                         dependent_component_task_status))
+                                                                                                 dependent_component_name,
+                                                                                                 dependent_component_task_status))
             if not dependent_component_task_status:
                 # dependency component run failed, break
                 return False
@@ -428,7 +428,8 @@ class TaskScheduler(object):
 
     @staticmethod
     def stop(job_id, end_status=JobStatus.FAILED, component_name=''):
-        schedule_logger(job_id).info('get {} job {} {} command'.format("cancel" if end_status == JobStatus.CANCELED else "stop", job_id, component_name))
+        schedule_logger(job_id).info(
+            'get {} job {} {} command'.format("cancel" if end_status == JobStatus.CANCELED else "stop", job_id, component_name))
         jobs = job_utils.query_job(job_id=job_id, is_initiator=1)
         cancel_success = False
         is_cancel = (end_status == JobStatus.CANCELED)
@@ -468,7 +469,8 @@ class TaskScheduler(object):
                     if response['retcode'] == 0:
                         cancel_success = True
                         schedule_logger(job_id).info(
-                            'send {} {} {} job {} {} command successfully'.format(role, party_id, "cancel" if is_cancel else "kill",
+                            'send {} {} {} job {} {} command successfully'.format(role, party_id,
+                                                                                  "cancel" if is_cancel else "kill",
                                                                                   job_id, component_name))
                         if is_cancel:
                             break
@@ -482,7 +484,8 @@ class TaskScheduler(object):
             jobs = job_utils.query_job(job_id=job_id)
             if jobs:
                 raise Exception('Current role is not this job initiator')
-            schedule_logger(job_id).info('send {} job {} {} command failed'.format("cancel" if is_cancel else "kill", job_id, component_name))
+            schedule_logger(job_id).info(
+                'send {} job {} {} command failed'.format("cancel" if is_cancel else "kill", job_id, component_name))
             raise Exception('can not found job: {}'.format(job_id))
 
     @staticmethod

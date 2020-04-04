@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #
 #  Copyright 2019 The FATE Authors. All Rights Reserved.
 #
@@ -15,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+#
 import argparse
 import json
 import os
@@ -50,7 +48,6 @@ TASK = 'train'
 # HOST_DATA_SET = 'breast_a.csv'
 GUEST_DATA_SET = 'default_credit_homo_guest.csv'
 HOST_DATA_SET = 'default_credit_homo_host.csv'
-
 
 # Define your party ids here
 GUEST_ID = 10000
@@ -105,7 +102,7 @@ def exec_upload_task(config_dict, role):
     prefix = '_'.join(['upload', role])
     config_path = save_config_file(config_dict=config_dict, prefix=prefix)
 
-    subp = subprocess.Popen(["python",
+    subp = subprocess.Popen(["python3",
                              FATE_FLOW_PATH,
                              "-f",
                              "upload",
@@ -117,11 +114,14 @@ def exec_upload_task(config_dict, role):
     stdout, stderr = subp.communicate()
     stdout = stdout.decode("utf-8")
     print("stdout:" + str(stdout))
-    stdout = json.loads(stdout)
-    status = stdout["retcode"]
-    if status != 0:
-        raise ValueError(
-            "[Upload task]exec fail, status:{}, stdout:{}".format(status, stdout))
+    try:
+        stdout1 = json.loads(stdout)
+        status = stdout1["retcode"]
+        if status != 0:
+            raise ValueError(
+                "[Upload task]exec fail, status:{}, stdout:{}".format(status, stdout))
+    except Exception as e:
+        print("exception: {}", e)
     return stdout
 
 
@@ -129,7 +129,7 @@ def exec_modeling_task(dsl_dict, config_dict):
     dsl_path = save_config_file(dsl_dict, 'train_dsl')
     conf_path = save_config_file(config_dict, 'train_conf')
     print("dsl_path: {}, conf_path: {}".format(dsl_path, conf_path))
-    subp = subprocess.Popen(["python",
+    subp = subprocess.Popen(["python3",
                              FATE_FLOW_PATH,
                              "-f",
                              "submit_job",
@@ -144,21 +144,24 @@ def exec_modeling_task(dsl_dict, config_dict):
     stdout, stderr = subp.communicate()
     stdout = stdout.decode("utf-8")
     print("stdout:" + str(stdout))
-    stdout = json.loads(stdout)
-    with open(LATEST_TRAINED_RESULT, 'w') as outfile:
-        json.dump(stdout, outfile)
+    try:
+        stdout = json.loads(stdout)
+        with open(LATEST_TRAINED_RESULT, 'w') as outfile:
+            json.dump(stdout, outfile)
 
-    status = stdout["retcode"]
-    if status != 0:
-        raise ValueError(
-            "[Trainning Task]exec fail, status:{}, stdout:{}".format(status, stdout))
+        status = stdout["retcode"]
+        if status != 0:
+            raise ValueError(
+                "[Trainning Task]exec fail, status:{}, stdout:{}".format(status, stdout))
+    except Exception as e:
+        print("exception: {}", e)
     return stdout
 
 
 def job_status_checker(jobid):
     # check_counter = 0
     # while True:
-    subp = subprocess.Popen(["python",
+    subp = subprocess.Popen(["python3",
                              FATE_FLOW_PATH,
                              "-f",
                              "query_job",
@@ -324,7 +327,7 @@ def predict_task():
     ]
 
     predict_conf_path = save_config_file(predict_conf, 'predict_conf')
-    subp = subprocess.Popen(["python",
+    subp = subprocess.Popen(["python3",
                              FATE_FLOW_PATH,
                              "-f",
                              "submit_job",

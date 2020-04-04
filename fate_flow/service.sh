@@ -23,7 +23,7 @@ venv=
 module=fate_flow_server.py
 
 getpid() {
-    pid=`lsof -i:9380 | awk 'NR==2{print $2}'`
+    pid=$(lsof -i:9380 | awk 'NR==2{print $2}')
 }
 
 mklogsdir() {
@@ -35,7 +35,7 @@ mklogsdir() {
 status() {
     getpid
     if [[ -n ${pid} ]]; then
-        echo "status:`ps aux | grep ${pid} | grep -v grep`"
+        echo "status:$(ps aux | grep ${pid} | grep -v grep)"
     else
         echo "service not running"
     fi
@@ -47,13 +47,13 @@ start() {
     if [[ ${pid} == "" ]]; then
         mklogsdir
         source ${venv}/bin/activate
-        nohup python $(echo ${PYTHONPATH} | awk -F":" '{print $1}')/fate_flow/fate_flow_server.py >> "${log_dir}/console.log" 2>>"${log_dir}/error.log" &
+        nohup python $(echo ${PYTHONPATH} | awk -F":" '{print $1}')/fate_flow/fate_flow_server.py >>"${log_dir}/console.log" 2>>"${log_dir}/error.log" &
         sleep 6
         getpid
-        if [[ -n ${pid} ]]; then 
-           echo "service start sucessfully. pid: ${pid}"
+        if [[ -n ${pid} ]]; then
+            echo "service start sucessfully. pid: ${pid}"
         else
-           echo "service start failed, please check ../logs/console.log and ../logs/error.log"
+            echo "service start failed, please check ../logs/console.log and ../logs/error.log"
         fi
     else
         echo "service already started. pid: ${pid}"
@@ -64,7 +64,7 @@ stop() {
     getpid
     if [[ -n ${pid} ]]; then
         echo "killing:
-        `ps aux | grep ${pid} | grep -v grep`"
+        $(ps aux | grep ${pid} | grep -v grep)"
         kill -9 ${pid}
         if [[ $? -eq 0 ]]; then
             echo "killed"
@@ -76,26 +76,26 @@ stop() {
     fi
 }
 
-
 case "$1" in
-    start)
-        start
-        status
-        ;;
+start)
+    start
+    status
+    ;;
 
-    stop)
-        stop
-        ;;
-    status)
-        status
-        ;;
+stop)
+    stop
+    ;;
+status)
+    status
+    ;;
 
-    restart)
-        stop
-        start
-        status
-        ;;
-    *)
-        echo "usage: $0 {start|stop|status|restart}"
-        exit -1
+restart)
+    stop
+    start
+    status
+    ;;
+*)
+    echo "usage: $0 {start|stop|status|restart}"
+    exit -1
+    ;;
 esac

@@ -21,8 +21,8 @@ import os
 from arch.api import RuntimeInstance
 from arch.api import WorkMode
 from arch.api import session
-from arch.api.utils import file_utils, version_control
 from arch.api.proto import default_empty_fill_pb2
+from arch.api.utils import file_utils, version_control
 from fate_flow.settings import stat_logger
 
 

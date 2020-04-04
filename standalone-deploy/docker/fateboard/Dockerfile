@@ -31,17 +31,12 @@ FROM docker.io/kdvolder/jdk8
 WORKDIR /fate
 
 COPY . /fate
-
-RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
-
-RUN tar -xf fateboard.tar
-
-RUN rm fateboard.tar
-
 COPY docker-entrypoint.sh /usr/local/bin/
 
+RUN rm /bin/sh && ln -sf /bin/bash /bin/sh
+RUN tar -xf fateboard.tar
+RUN rm fateboard.tar
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENV PYTHONPATH /fate
-
 ENTRYPOINT ["docker-entrypoint.sh"]

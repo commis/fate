@@ -13,14 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import sys
 import argparse
 import json
 import os
+import sys
 import tarfile
+import time
 import traceback
 from contextlib import closing
-import time
 
 import requests
 
@@ -201,8 +201,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--dsl', required=False, type=str, help="dsl path")
     parser.add_argument('-f', '--function', type=str,
                         choices=(
-                                DATA_FUNC + MODEL_FUNC + JOB_FUNC + JOB_OPERATE_FUNC + TASK_OPERATE_FUNC + TABLE_FUNC +
-                                TRACKING_FUNC + PERMISSION_FUNC),
+                            DATA_FUNC + MODEL_FUNC + JOB_FUNC + JOB_OPERATE_FUNC + TASK_OPERATE_FUNC + TABLE_FUNC +
+                            TRACKING_FUNC + PERMISSION_FUNC),
                         required=True,
                         help="function to call")
     parser.add_argument('-j', '--job_id', required=False, type=str, help="job id")
@@ -243,7 +243,8 @@ if __name__ == "__main__":
         response = call_fun(args.function, config_data, dsl_path, config_path)
     except Exception as e:
         exc_type, exc_value, exc_traceback_obj = sys.exc_info()
-        response = {'retcode': 100, 'retmsg': str(e), 'traceback': traceback.format_exception(exc_type, exc_value, exc_traceback_obj)}
+        response = {'retcode': 100, 'retmsg': str(e),
+                    'traceback': traceback.format_exception(exc_type, exc_value, exc_traceback_obj)}
         if 'Connection refused' in str(e):
             response['retmsg'] = 'Connection refused, Please check if the fate flow service is started'
             del response['traceback']

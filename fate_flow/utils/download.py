@@ -16,7 +16,6 @@
 import os
 
 from arch.api import session
-
 from arch.api.utils import log_utils, dtable_utils
 from fate_flow.entity.metric import Metric, MetricMeta
 
@@ -51,7 +50,7 @@ class Download(object):
                 if lines % 2000 == 0:
                     LOGGER.info("===== export {} lines =====".format(lines))
                 if lines % 10000 == 0:
-                    job_info = {'f_progress': lines/count*100//1}
+                    job_info = {'f_progress': lines / count * 100 // 1}
                     self.update_job_status(self.parameters["local"]['role'], self.parameters["local"]['party_id'],
                                            job_info)
             self.update_job_status(self.parameters["local"]['role'],
@@ -86,8 +85,3 @@ class Download(object):
                                      metric_name,
                                      MetricMeta(name='download',
                                                 metric_type='DOWNLOAD'))
-
-
-
-
-

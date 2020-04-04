@@ -1,5 +1,6 @@
 # common file patterns
 .DS_STORE
+.vscode
 .idea
 *.iml
 *.pyc
@@ -19,16 +20,16 @@ __pycache__
 /arch/networking/proxy/target/
 /arch/driver/target/
 /arch/eggroll/target/
+/arch/target/
 /fate-serving/federatedml/target/
 /fate-serving/serving-server/target/
 /fate-serving/target/
 /fate-serving/fate-serving-core/target/
 /arch/networking/target/
-/arch/target/
 /fateboard/target/
+
+/examples/user_config/
 /data/
-/logs/
 /jobs/
+/logs/
 /audit/
-.vscode/*
-/eggroll/

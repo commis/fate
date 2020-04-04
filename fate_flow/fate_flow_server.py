@@ -17,8 +17,8 @@ import os
 import signal
 import sys
 import time
-from concurrent import futures
 import traceback
+from concurrent import futures
 
 import grpc
 from flask import Flask
@@ -31,19 +31,19 @@ from arch.api.proto import proxy_pb2_grpc
 from fate_flow.apps.data_access_app import manager as data_access_app_manager
 from fate_flow.apps.job_app import manager as job_app_manager
 from fate_flow.apps.machine_learning_model_app import manager as model_app_manager
+from fate_flow.apps.permission_app import manager as permission_app_manager
 from fate_flow.apps.pipeline_app import manager as pipeline_app_manager
+from fate_flow.apps.schedule_app import manager as schedule_app_manager
 from fate_flow.apps.table_app import manager as table_app_manager
 from fate_flow.apps.tracking_app import manager as tracking_app_manager
-from fate_flow.apps.schedule_app import manager as schedule_app_manager
-from fate_flow.apps.permission_app import manager as permission_app_manager
 from fate_flow.db.db_models import init_database_tables
 from fate_flow.driver import dag_scheduler, job_controller, job_detector
-from fate_flow.entity.runtime_config import RuntimeConfig
 from fate_flow.entity.constant_config import WorkMode
+from fate_flow.entity.runtime_config import RuntimeConfig
 from fate_flow.manager import queue_manager
 from fate_flow.settings import IP, GRPC_PORT, CLUSTER_STANDALONE_JOB_SERVER_PORT, _ONE_DAY_IN_SECONDS, \
-    MAX_CONCURRENT_JOB_RUN, stat_logger, API_VERSION, ZOOKEEPER_HOSTS, USE_CONFIGURATION_CENTER, SERVINGS_ZK_PATH, \
-    FATE_FLOW_ZK_PATH, HTTP_PORT, FATE_FLOW_MODEL_TRANSFER_PATH
+    MAX_CONCURRENT_JOB_RUN, stat_logger, API_VERSION, ZOOKEEPER_HOSTS, USE_CONFIGURATION_CENTER, FATE_FLOW_ZK_PATH, HTTP_PORT, \
+    FATE_FLOW_MODEL_TRANSFER_PATH
 from fate_flow.utils import job_utils
 from fate_flow.utils.api_utils import get_json_result
 from fate_flow.utils.authentication_utils import PrivilegeAuth
@@ -83,6 +83,7 @@ if __name__ == '__main__':
     init_database_tables()
     # init runtime config
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--standalone_node', default=False, help="if standalone node mode or not ", action='store_true')
     args = parser.parse_args()

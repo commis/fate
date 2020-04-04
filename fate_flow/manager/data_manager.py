@@ -16,9 +16,8 @@
 import operator
 
 from arch.api import session
-from fate_flow.settings import stat_logger
-
 from fate_flow.db.db_models import DB, DataView, TrackingMetric
+from fate_flow.settings import stat_logger
 
 
 def query_data_view(**kwargs):

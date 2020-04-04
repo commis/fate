@@ -24,12 +24,12 @@ from arch.api.utils import file_utils, log_utils
 from arch.api.utils.core import current_timestamp, get_lan_ip, timestamp_to_date
 from arch.api.utils.log_utils import schedule_logger
 from fate_flow.db.db_models import Task
+from fate_flow.entity.constant_config import TaskStatus
 from fate_flow.entity.runtime_config import RuntimeConfig
 from fate_flow.manager.tracking import Tracking
 from fate_flow.settings import API_VERSION
 from fate_flow.utils import job_utils
 from fate_flow.utils.api_utils import federated_api
-from fate_flow.entity.constant_config import TaskStatus
 
 
 class TaskExecutor(object):
@@ -77,7 +77,8 @@ class TaskExecutor(object):
             # init environment, process is shared globally
             RuntimeConfig.init_config(WORK_MODE=job_parameters['work_mode'],
                                       BACKEND=job_parameters.get('backend', 0))
-            session.init(job_id='{}_{}_{}'.format(task_id, role, party_id), mode=RuntimeConfig.WORK_MODE, backend=RuntimeConfig.BACKEND)
+            session.init(job_id='{}_{}_{}'.format(task_id, role, party_id), mode=RuntimeConfig.WORK_MODE,
+                         backend=RuntimeConfig.BACKEND)
             federation.init(job_id=task_id, runtime_conf=parameters)
             job_log_dir = os.path.join(job_utils.get_job_log_directory(job_id=job_id), role, str(party_id))
             task_log_dir = os.path.join(job_log_dir, component_name)
@@ -99,7 +100,7 @@ class TaskExecutor(object):
             task.f_run_ip = get_lan_ip()
             task.f_run_pid = executor_pid
             run_class_paths = parameters.get('CodePath').split('/')
-            run_class_package = '.'.join(run_class_paths[:-2]) + '.' + run_class_paths[-2].replace('.py','')
+            run_class_package = '.'.join(run_class_paths[:-2]) + '.' + run_class_paths[-2].replace('.py', '')
             run_class_name = run_class_paths[-1]
             task_run_args = TaskExecutor.get_task_run_args(job_id=job_id, role=role, party_id=party_id,
                                                            job_parameters=job_parameters, job_args=job_args,
@@ -118,7 +119,8 @@ class TaskExecutor(object):
             schedule_logger().info(task_input_dsl)
             run_object.run(parameters, task_run_args)
             output_data = run_object.save_data()
-            tracker.save_output_data_table(output_data, task_output_dsl.get('data')[0] if task_output_dsl.get('data') else 'component')
+            tracker.save_output_data_table(output_data,
+                                           task_output_dsl.get('data')[0] if task_output_dsl.get('data') else 'component')
             output_model = run_object.export_model()
             # There is only one model output at the current dsl version.
             tracker.save_output_model(output_model, task_output_dsl['model'][0] if task_output_dsl.get('model') else 'default')
@@ -145,12 +147,13 @@ class TaskExecutor(object):
             except Exception as e:
                 traceback.print_exc()
                 schedule_logger().exception(e)
-        schedule_logger().info('task {} {} {} start time: {}'.format(task_id, role, party_id, timestamp_to_date(task.f_start_time)))
-        schedule_logger().info('task {} {} {} end time: {}'.format(task_id, role, party_id, timestamp_to_date(task.f_end_time)))
-        schedule_logger().info('task {} {} {} takes {}s'.format(task_id, role, party_id, int(task.f_elapsed)/1000))
         schedule_logger().info(
-            'finish {} {} {} {} {} {} task'.format(job_id, component_name, task_id, role, party_id, task.f_status if sync_success else TaskStatus.FAILED))
-
+            'task {} {} {} start time: {}'.format(task_id, role, party_id, timestamp_to_date(task.f_start_time)))
+        schedule_logger().info('task {} {} {} end time: {}'.format(task_id, role, party_id, timestamp_to_date(task.f_end_time)))
+        schedule_logger().info('task {} {} {} takes {}s'.format(task_id, role, party_id, int(task.f_elapsed) / 1000))
+        schedule_logger().info(
+            'finish {} {} {} {} {} {} task'.format(job_id, component_name, task_id, role, party_id,
+                                                   task.f_status if sync_success else TaskStatus.FAILED))
 
     @staticmethod
     def get_task_run_args(job_id, role, party_id, job_parameters, job_args, input_dsl):
@@ -164,7 +167,7 @@ class TaskExecutor(object):
                         search_component_name, search_data_name = data_key_item[0], data_key_item[1]
                         if search_component_name == 'args':
                             if job_args.get('data', {}).get(search_data_name).get('namespace', '') and job_args.get(
-                                    'data', {}).get(search_data_name).get('name', ''):
+                                'data', {}).get(search_data_name).get('name', ''):
 
                                 data_table = session.table(
                                     namespace=job_args['data'][search_data_name]['namespace'],
@@ -209,7 +212,8 @@ class TaskExecutor(object):
             return parameters[role][role_index]
 
     @staticmethod
-    def sync_task_status(job_id, component_name, task_id, role, party_id, initiator_party_id, initiator_role, task_info, update=False):
+    def sync_task_status(job_id, component_name, task_id, role, party_id, initiator_party_id, initiator_role, task_info,
+        update=False):
         sync_success = True
         for dest_party_id in {party_id, initiator_party_id}:
             if party_id != initiator_party_id and dest_party_id == initiator_party_id:
@@ -231,7 +235,8 @@ class TaskExecutor(object):
                                      work_mode=RuntimeConfig.WORK_MODE)
             if response['retcode']:
                 sync_success = False
-                schedule_logger().exception('job {} role {} party {} synchronize task status failed'.format(job_id, role, party_id))
+                schedule_logger().exception(
+                    'job {} role {} party {} synchronize task status failed'.format(job_id, role, party_id))
                 break
         if not sync_success and not update:
             task_info['f_status'] = TaskStatus.FAILED
@@ -239,6 +244,7 @@ class TaskExecutor(object):
                                           initiator_role, task_info, update=True)
         if update:
             raise Exception('job {} role {} party {} synchronize task status failed'.format(job_id, role, party_id))
+
 
 if __name__ == '__main__':
     TaskExecutor.run_task()

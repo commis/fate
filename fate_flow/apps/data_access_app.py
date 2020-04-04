@@ -13,15 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import os
 
 from flask import Flask, request
 
 from arch.api import session
-from fate_flow.settings import stat_logger
-from fate_flow.utils.api_utils import get_json_result
-from fate_flow.utils import detect_utils, job_utils
 from fate_flow.driver.job_controller import JobController
+from fate_flow.settings import stat_logger
+from fate_flow.utils import detect_utils, job_utils
+from fate_flow.utils.api_utils import get_json_result
 from fate_flow.utils.job_utils import get_job_configuration
 
 manager = Flask(__name__)
@@ -49,7 +48,8 @@ def download_upload(access_module):
         data['table_name'] = request_config["table_name"]
         data['namespace'] = request_config["namespace"]
     job_dsl, job_runtime_conf = gen_data_access_job_config(request_config, access_module)
-    job_id, job_dsl_path, job_runtime_conf_path, logs_directory, model_info, board_url = JobController.submit_job({'job_dsl': job_dsl, 'job_runtime_conf': job_runtime_conf})
+    job_id, job_dsl_path, job_runtime_conf_path, logs_directory, model_info, board_url = JobController.submit_job(
+        {'job_dsl': job_dsl, 'job_runtime_conf': job_runtime_conf})
     data.update({'job_dsl_path': job_dsl_path, 'job_runtime_conf_path': job_runtime_conf_path,
                  'board_url': board_url, 'logs_directory': logs_directory})
     return get_json_result(job_id=job_id, data=data)
@@ -67,7 +67,7 @@ def get_upload_history():
         tasks = job_utils.query_task(component_name='upload_0', status='success', job_id=request_data.get('job_id'))
     else:
         tasks = job_utils.query_task(component_name='upload_0', status='success')
-    limit= request_data.get('limit')
+    limit = request_data.get('limit')
     if not limit:
         tasks = tasks[-1::-1]
     else:

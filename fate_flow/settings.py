@@ -16,17 +16,16 @@
 # -*- coding: utf-8 -*-
 import os
 
-from arch.api.utils import file_utils
-from arch.api.utils import log_utils
-from fate_flow.entity.runtime_config import RuntimeConfig
-from arch.api.utils.core import get_lan_ip
 import __main__
 
+from arch.api.utils import file_utils
+from arch.api.utils import log_utils
+from arch.api.utils.core import get_lan_ip
+from fate_flow.entity.runtime_config import RuntimeConfig
 from fate_flow.utils.setting_utils import CenterConfig
 
-
 WORK_MODE = 0
-USE_LOCAL_DATABASE = True
+USE_LOCAL_DATABASE = False
 
 # Local authentication switch
 USE_AUTHENTICATION = False
@@ -49,8 +48,8 @@ REDIS_QUEUE_DB_INDEX = 0
 DATABASE = {
     'name': 'fate_flow',
     'user': 'root',
-    'passwd': 'fate_dev',
-    'host': '127.0.0.1',
+    'passwd': 'Energy@123456',
+    'host': '192.168.3.30',
     'port': 3306,
     'max_connections': 100,
     'stale_timeout': 30,
@@ -92,7 +91,6 @@ stat_logger = log_utils.getLogger("fate_flow_stat")
 detect_logger = log_utils.getLogger("fate_flow_detect")
 access_logger = log_utils.getLogger("fate_flow_access")
 
-
 """
 Services 
 """
@@ -103,7 +101,6 @@ HTTP_PORT = 9380
 # standalone job will be send to the standalone job server when FATE-Flow work on cluster deploy mode,
 # but not the port for FATE-Flow on standalone deploy mode.
 CLUSTER_STANDALONE_JOB_SERVER_PORT = 9381
-
 
 # services ip and port
 SERVER_CONF_PATH = 'arch/conf/server_conf.json'

@@ -465,7 +465,7 @@ class DSLParser(object):
                                                                                         module)
                         for i in range(len(dependency_list)):
                             if parameters[role][i].get(param_class) is None \
-                                    or parameters[role][i][param_class].get("need_run") is False:
+                                or parameters[role][i][param_class].get("need_run") is False:
                                 dependency_list[i]["component_need_run"][name] = False
                             else:
                                 dependency_list[i]["component_need_run"][name] = True
@@ -615,8 +615,8 @@ class DSLParser(object):
 
                 up_input_data_component_name = up_input_data.split(".", -1)[0]
                 if up_input_data_component_name == "args" or self.get_need_deploy_parameter(
-                        name=up_input_data_component_name,
-                        setting_conf_prefix=setting_conf_prefix):
+                    name=up_input_data_component_name,
+                    setting_conf_prefix=setting_conf_prefix):
                     output_data_maps[name][output_data_str] = [up_input_data]
                 else:
                     up_input_data_suf = up_input_data.split(".", -1)[-1]
@@ -627,8 +627,8 @@ class DSLParser(object):
             return
 
     def run(self, pipeline_dsl=None, pipeline_runtime_conf=None, dsl=None, runtime_conf=None,
-            default_runtime_conf_prefix=None,
-            setting_conf_prefix=None, mode="train"):
+        default_runtime_conf_prefix=None,
+        setting_conf_prefix=None, mode="train"):
 
         self.dsl = copy.deepcopy(dsl)
         self._init_components(pipeline_dsl, mode)

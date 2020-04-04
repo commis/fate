@@ -21,8 +21,6 @@ from fate_flow.driver.job_controller import TaskScheduler
 from fate_flow.manager.queue_manager import BaseQueue
 
 
-
-
 class DAGScheduler(threading.Thread):
     def __init__(self, queue: BaseQueue, concurrent_num: int = 1):
         super(DAGScheduler, self).__init__()
